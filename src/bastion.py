@@ -6,6 +6,7 @@ from platform import python_version
 from threading import Thread
 
 from dotenv import load_dotenv
+from httpx import Client
 import praw
 
 
@@ -34,10 +35,15 @@ def run_on_submissions() -> None:
 
 def run_on_comments() -> None:
     logger = logging.getLogger("bastion-comments")
+    api = getenv("API_URL")
+    if api:
+        client = Client(http2=True, base_url=api)
     reddit = get_reddit_client()
     subreddits = reddit.subreddit(getenv("SUBREDDITS"))
     for comment in subreddits.stream.comments():
         logger.info(f"{comment.id}|{comment.created_utc}|{comment.body}")
+        if api:
+            logger.info(client.get("/ocg-tcg/random").json()[0]["name"]["en"])
 
 
 def main():

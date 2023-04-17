@@ -25,6 +25,7 @@ REDDIT_CLIENT_SECRET=
 REDDIT_USERNAME=
 REDDIT_PASSWORD=
 SUBREDDITS=yugioh+yugioh101
+API_URL=
 ```
 
 Run the bot with your IDE or in the shell!
