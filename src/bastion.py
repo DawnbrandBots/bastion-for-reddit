@@ -1,9 +1,12 @@
 # SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 import logging
+import re
 from os import getenv
 from platform import python_version
 from threading import Thread
+from typing import Any, Dict, List
+from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from httpx import Client
@@ -27,23 +30,39 @@ def get_reddit_client() -> praw.Reddit:
 
 def run_on_submissions() -> None:
     logger = logging.getLogger("bastion-submissions")
+    client = Client(http2=True, base_url=getenv("API_URL"))
     reddit = get_reddit_client()
     subreddits = reddit.subreddit(getenv("SUBREDDITS"))
     for submission in subreddits.stream.submissions():
         logger.info(f"{submission.id}|{submission.created_utc}|{submission.title}")
+        summons = parse_summons(submission.selftext)
+        logger.info(f"{submission.id}|{summons}")
+        cards = get_cards(client, summons)
+        logger.info(f"{submission.id}|{cards}")
 
 
 def run_on_comments() -> None:
     logger = logging.getLogger("bastion-comments")
-    api = getenv("API_URL")
-    if api:
-        client = Client(http2=True, base_url=api)
+    client = Client(http2=True, base_url=getenv("API_URL"))
     reddit = get_reddit_client()
     subreddits = reddit.subreddit(getenv("SUBREDDITS"))
     for comment in subreddits.stream.comments():
         logger.info(f"{comment.id}|{comment.created_utc}|{comment.body}")
-        if api:
-            logger.info(client.get("/ocg-tcg/random").json()[0]["name"]["en"])
+        summons = parse_summons(comment.body)
+        logger.info(f"{comment.id}|{summons}")
+        cards = get_cards(client, summons)
+        logger.info(f"{comment.id}|{cards}")
+
+
+summon_regex = re.compile("{{([^}]+)}}")
+
+
+def parse_summons(text: str) -> List[str]:
+    return summon_regex.findall(text)
+
+
+def get_cards(client: Client, names: List[str]) -> List[Dict[str, Any]]:
+    return [client.get(f"/ocg-tcg/search?name={quote_plus(name)}").json() for name in names]
 
 
 def main():
