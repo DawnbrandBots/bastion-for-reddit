@@ -58,6 +58,22 @@ def run_on_comments() -> None:
         reply_with_cards(comment, logger, cards)
 
 
+def run_on_mentions() -> None:
+    logger = logging.getLogger("bastion-mentions")
+    client = Client(http2=True, base_url=getenv("API_URL"))
+    reddit = get_reddit_client()
+    subreddits = getenv("SUBREDDITS").split("+")
+    for comment in reddit.inbox.mentions():
+        logger.info(f"{comment.id}|{comment.created_utc}|{comment.body}")
+        if comment.subreddit.display_name.lower() not in subreddits:
+            summons = parse_summons(comment.body)
+            logger.info(f"{comment.id}|{summons}")
+            cards = get_cards(client, summons)
+            logger.info(f"{comment.id}|{cards}")
+            reply_with_cards(comment, logger, cards)
+
+
+
 summon_regex = re.compile("{{([^}]+)}}")
 
 
@@ -88,6 +104,7 @@ def main():
     load_dotenv()
     submissions_thread = Thread(target=run_on_submissions, name="submissions")
     comments_thread = Thread(target=run_on_comments, name="comments")
+    #mentions_thread = Thread(target=run_on_mentions, name="mentions")
     submissions_thread.start()
     comments_thread.start()
 
