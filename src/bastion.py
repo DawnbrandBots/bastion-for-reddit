@@ -11,6 +11,8 @@ from urllib.parse import quote_plus
 from dotenv import load_dotenv
 from httpx import Client
 import praw
+from praw.models import Comment
+from prawcore import Forbidden
 
 
 def user_agent() -> str:
@@ -39,6 +41,7 @@ def run_on_submissions() -> None:
         logger.info(f"{submission.id}|{summons}")
         cards = get_cards(client, summons)
         logger.info(f"{submission.id}|{cards}")
+        reply_with_cards(submission, logger, cards)
 
 
 def run_on_comments() -> None:
@@ -52,6 +55,7 @@ def run_on_comments() -> None:
         logger.info(f"{comment.id}|{summons}")
         cards = get_cards(client, summons)
         logger.info(f"{comment.id}|{cards}")
+        reply_with_cards(comment, logger, cards)
 
 
 summon_regex = re.compile("{{([^}]+)}}")
@@ -63,6 +67,20 @@ def parse_summons(text: str) -> List[str]:
 
 def get_cards(client: Client, names: List[str]) -> List[Dict[str, Any]]:
     return [client.get(f"/ocg-tcg/search?name={quote_plus(name)}").json() for name in names]
+
+
+def reply_with_cards(
+    target: praw.models.Submission | praw.models.Comment,
+    logger: logging.Logger,
+    cards: List[Dict[str, Any]]
+) -> None:
+    if len(cards):
+        try:
+            reply: Comment = target.reply("|".join(card["name"]["en"] for card in cards))
+            logger.info(f"{reply.id}")
+            reply.disable_inbox_replies()
+        except Forbidden as e:
+            logger.warning(e)
 
 
 def main():
