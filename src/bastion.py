@@ -8,9 +8,9 @@ from threading import Thread
 from typing import Any, Dict, List
 from urllib.parse import quote_plus
 
+import praw
 from dotenv import load_dotenv
 from httpx import Client
-import praw
 from praw.models import Comment
 from prawcore import Forbidden
 
@@ -36,7 +36,8 @@ def run_on_submissions() -> None:
     reddit = get_reddit_client()
     subreddits = reddit.subreddit(getenv("SUBREDDITS"))
     for submission in subreddits.stream.submissions():
-        logger.info(f"{submission.id}|{submission.created_utc}|{submission.title}")
+        logger.info(
+            f"{submission.id}|{submission.created_utc}|{submission.title}")
         summons = parse_summons(submission.selftext)
         logger.info(f"{submission.id}|{summons}")
         cards = get_cards(client, summons)
@@ -73,7 +74,6 @@ def run_on_mentions() -> None:
             reply_with_cards(comment, logger, cards)
 
 
-
 summon_regex = re.compile("{{([^}]+)}}")
 
 
@@ -85,14 +85,126 @@ def get_cards(client: Client, names: List[str]) -> List[Dict[str, Any]]:
     return [client.get(f"/ocg-tcg/search?name={quote_plus(name)}").json() for name in names]
 
 
+def formatLimitRegulation(value: int | None) -> int | None:
+    match value:
+        case "Forbidden":
+            return 0
+        case "Limited":
+            return 1
+        case "Semi-Limited":
+            return 2
+        case "Unlimited":
+            return 3
+        case _:
+            return None
+
+
+def formatFooter(card: Any) -> str:
+    text = ""
+    if card.password and card.konami_id:
+        text = f"Password: {card.password} | Konami ID #{card.konami_id}"
+    elif not card.password and card.konami_id:
+        text = f"No password | Konami ID #{card.konami_id}"
+    elif card.password and not card.konami_id:
+        text = f"Password: {card.password} | Not yet released"
+    else:
+        text = "Not yet released"
+
+    if card.fake_password:
+        text += f"Placeholder ID: {card.fake_password}"
+
+    return f"^{text}"
+
+
+def generate_card_display(card: Any) -> str:
+    yugipediaPage = card.konami_id or quote_plus(card.name.en)
+    yugipedia = f"https://yugipedia.com/wiki/{yugipediaPage}?utm_source=bastion"
+    ygoprodeckTerm = card.password or card.name.en
+    ygoprodeck = f"https://ygoprodeck.com/card/?search={quote_plus(ygoprodeckTerm)}&utm_source=bastion"
+    # Official database, does not work for zh locales
+    official = f"https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&request_locale=en&cid={card.konami_id}"
+    rulings = f"https://www.db.yugioh-card.com/yugiohdb/faq_search.action?ope=4&request_locale=ja&cid={card.konami_id}"
+
+    fullText = ""
+
+    title = f"# [{card.name.en}]({ygoprodeck})"
+
+    fullText += title + "\n"
+
+    links = f"## 🔗 Links\n[Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
+
+    if card.konami_id == None:
+        links = f"## 🔗 Links\n[Yugipedia](${yugipedia}) | [YGOPRODECK](${ygoprodeck})"
+
+    description = ""
+
+    limitRegulations = [
+        {"label": "TCG: ", "value": formatLimitRegulation(
+            card.limit_regulation.tcg)},
+        {"label": "OCG: ", "value": formatLimitRegulation(
+            card.limit_regulation.ocg)},
+        {"label": "Speed: ", "value": formatLimitRegulation(
+            card.limit_regulation.speed)}
+    ]
+
+    limitRegulationDisplay = " / ".join(
+        map(lambda l: f"{l.label}{l.value}", filter(lambda l: l.value != None)))
+
+    if len(limitRegulationDisplay) > 0:
+        description += f"** Limit**: {limitRegulationDisplay}"
+
+    if card.card_type == "Monster":
+        description += f"** Type**: {card.monster_type_line}"
+        description += "\n"
+        description += f"** Attribute**: {card.attribute}"
+        description += "\n"
+
+        if "rank" in card:
+            description += f"** Rank**: {card.rank} ** ATK**: {card.atk} ** DEF**: {card['def']}"
+        elif "link_arrows" in card:
+            arrows = "".join(card.link_arrows)
+            description += f"** Link Rating**: {card.link_arrows.length} ** ATK**: {card.atk} ** Link Arrows**: {arrows}"
+        else:
+            description += f"** Level**: {card.level} ** ATK**: {card.atk} ** DEF**: {card['def']}"
+
+        if card.pendulum_scale != None:
+            formattedScale = f"{card.pendulum_scale} / {card.pendulum_scale}"
+            description += " "
+            description += f"** Pendulum Scale**: {formattedScale}"
+
+        fullText += description + "\n"
+
+        if card.pendulum_effect != None:
+            fullText += "## Pendulum Effect\n" + \
+                (card.pendulum_effect.en or "\u200b") + "\n"
+
+        fullText += "## Card Text\n" + (card.text.en or "\u200b")
+    else:
+        # Spells and Traps
+
+        description += "\n"
+        description += f"{card.property} {card.card_type}"
+
+        fullText += description + "\n"
+
+        fullText += "## Card Effect\n" + (card.text.en or "\u200b")
+
+    fullText += "\n" + links + "\n"
+
+    return fullText
+
+
 def reply_with_cards(
     target: praw.models.Submission | praw.models.Comment,
     logger: logging.Logger,
     cards: List[Dict[str, Any]]
+
+
 ) -> None:
     if len(cards):
         try:
-            reply: Comment = target.reply("|".join(card["name"]["en"] for card in cards))
+            reply: Comment = target.reply(
+                "\n\n".join(generate_card_display(card) for card in cards))
             logger.info(f"{reply.id}")
             reply.disable_inbox_replies()
         except Forbidden as e:
@@ -102,9 +214,10 @@ def reply_with_cards(
 def main():
     logging.basicConfig(level=logging.INFO)
     load_dotenv()
-    submissions_thread = Thread(target=run_on_submissions, name="submissions")
+    submissions_thread = Thread(
+        target=run_on_submissions, name="submissions")
     comments_thread = Thread(target=run_on_comments, name="comments")
-    #mentions_thread = Thread(target=run_on_mentions, name="mentions")
+    # mentions_thread = Thread(target=run_on_mentions, name="mentions")
     submissions_thread.start()
     comments_thread.start()
 
