@@ -101,95 +101,98 @@ def formatLimitRegulation(value: int | None) -> int | None:
 
 def formatFooter(card: Any) -> str:
     text = ""
-    if card.password and card.konami_id:
-        text = f"Password: {card.password} | Konami ID #{card.konami_id}"
-    elif not card.password and card.konami_id:
-        text = f"No password | Konami ID #{card.konami_id}"
-    elif card.password and not card.konami_id:
-        text = f"Password: {card.password} | Not yet released"
+    if card['password'] and card['konami_id']:
+        text = f"^Password: ^{card['password']} ^| ^Konami ^ID ^#{card['konami_id']}"
+    elif not card['password'] and card['konami_id']:
+        text = f"^No ^password ^| ^Konami ^ID ^#{card['konami_id']}"
+    elif card['password'] and not card['konami_id']:
+        text = f"^Password: ^{card['password']} ^| ^Not ^yet ^released"
     else:
-        text = "Not yet released"
+        text = "^Not ^yet ^released"
 
-    if card.fake_password:
-        text += f"Placeholder ID: {card.fake_password}"
+    if card.get('fake_password') != None:
+        text += f"^Placeholder ^ID: ^{card['fake_password']}"
 
-    return f"^{text}"
+    return text
 
 
 def generate_card_display(card: Any) -> str:
-    yugipediaPage = card.konami_id or quote_plus(card.name.en)
+    yugipediaPage = card['konami_id'] or quote_plus(card['name']['en'])
     yugipedia = f"https://yugipedia.com/wiki/{yugipediaPage}?utm_source=bastion"
-    ygoprodeckTerm = card.password or card.name.en
-    ygoprodeck = f"https://ygoprodeck.com/card/?search={quote_plus(ygoprodeckTerm)}&utm_source=bastion"
+    ygoprodeckTerm = card['password'] or quote_plus(card['name']['en'])
+    ygoprodeck = f"https://ygoprodeck.com/card/?search={ygoprodeckTerm}&utm_source=bastion"
     # Official database, does not work for zh locales
-    official = f"https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&request_locale=en&cid={card.konami_id}"
-    rulings = f"https://www.db.yugioh-card.com/yugiohdb/faq_search.action?ope=4&request_locale=ja&cid={card.konami_id}"
+    official = f"https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&request_locale=en&cid={card['konami_id']}"
+    rulings = f"https://www.db.yugioh-card.com/yugiohdb/faq_search.action?ope=4&request_locale=ja&cid={card['konami_id']}"
 
     fullText = ""
 
-    title = f"# [{card.name.en}]({ygoprodeck})"
+    title = f"# [{card['name']['en']}]({ygoprodeck})"
 
     fullText += title + "\n"
 
     links = f"## 🔗 Links\n[Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
-    if card.konami_id == None:
-        links = f"## 🔗 Links\n[Yugipedia](${yugipedia}) | [YGOPRODECK](${ygoprodeck})"
+    if card['konami_id'] == None:
+        links = f"## 🔗 Links\n[Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
     description = ""
 
     limitRegulations = [
         {"label": "TCG: ", "value": formatLimitRegulation(
-            card.limit_regulation.tcg)},
+            card["limit_regulation"].get("tcg"))},
         {"label": "OCG: ", "value": formatLimitRegulation(
-            card.limit_regulation.ocg)},
+            card["limit_regulation"].get("ocg"))},
         {"label": "Speed: ", "value": formatLimitRegulation(
-            card.limit_regulation.speed)}
+            card["limit_regulation"].get("speed"))}
     ]
 
     limitRegulationDisplay = " / ".join(
-        map(lambda l: f"{l.label}{l.value}", filter(lambda l: l.value != None)))
+        map(lambda l: f"{l['label']}{l['value']}", filter(lambda l: l['value'] != None, limitRegulations)))
 
     if len(limitRegulationDisplay) > 0:
-        description += f"** Limit**: {limitRegulationDisplay}"
+        description += f"**Limit**: {limitRegulationDisplay}"
 
-    if card.card_type == "Monster":
-        description += f"** Type**: {card.monster_type_line}"
-        description += "\n"
-        description += f"** Attribute**: {card.attribute}"
-        description += "\n"
+    description += "\n\n"
+    if card['card_type'] == "Monster":
+        description += f"**Type**: {card['monster_type_line']}"
+        description += "\n\n"
+        description += f"**Attribute**: {card['attribute']}"
+        description += "\n\n"
 
         if "rank" in card:
-            description += f"** Rank**: {card.rank} ** ATK**: {card.atk} ** DEF**: {card['def']}"
+            description += f"**Rank**: {card['rank']} **ATK**: {card['atk']} **DEF**: {card['def']}"
         elif "link_arrows" in card:
-            arrows = "".join(card.link_arrows)
-            description += f"** Link Rating**: {card.link_arrows.length} ** ATK**: {card.atk} ** Link Arrows**: {arrows}"
+            arrows = "".join(card['link_arrows'])
+            description += f"**Link Rating**: {len(card['link_arrows'])} **ATK**: {card['atk']} **Link Arrows**: {arrows}"
         else:
-            description += f"** Level**: {card.level} ** ATK**: {card.atk} ** DEF**: {card['def']}"
+            description += f"**Level**: {card['level']} **ATK**: {card['atk']} **DEF**: {card['def']}"
 
-        if card.pendulum_scale != None:
-            formattedScale = f"{card.pendulum_scale} / {card.pendulum_scale}"
+        if card.get('pendulum_scale') != None:
+            formattedScale = f"{card['pendulum_scale']} / {card['pendulum_scale']}"
             description += " "
-            description += f"** Pendulum Scale**: {formattedScale}"
+            description += f"**Pendulum Scale**: {formattedScale}"
 
-        fullText += description + "\n"
+        fullText += description + "\n\n"
 
-        if card.pendulum_effect != None:
+        if card.get('pendulum_effect') != None:
             fullText += "## Pendulum Effect\n" + \
-                (card.pendulum_effect.en or "\u200b") + "\n"
+                (card['pendulum_effect']['en'] or "\u200b") + "\n"
 
-        fullText += "## Card Text\n" + (card.text.en or "\u200b")
+        fullText += "## Card Text\n" + (card['text']['en'] or "\u200b")
     else:
         # Spells and Traps
 
-        description += "\n"
-        description += f"{card.property} {card.card_type}"
+        description += "\n\n"
+        description += f"{card['property']} {card['card_type']}"
 
-        fullText += description + "\n"
+        fullText += description + "\n\n"
 
-        fullText += "## Card Effect\n" + (card.text.en or "\u200b")
+        fullText += "## Card Effect\n" + (card['text']['en'] or "\u200b")
 
-    fullText += "\n" + links + "\n"
+    fullText += "\n\n" + links + "\n\n"
+
+    fullText += formatFooter(card)
 
     return fullText
 
@@ -198,8 +201,6 @@ def reply_with_cards(
     target: praw.models.Submission | praw.models.Comment,
     logger: logging.Logger,
     cards: List[Dict[str, Any]]
-
-
 ) -> None:
     if len(cards):
         try:
