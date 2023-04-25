@@ -102,18 +102,18 @@ def formatLimitRegulation(value: int | None) -> int | None:
 def formatFooter(card: Any) -> str:
     text = ""
     if card['password'] and card['konami_id']:
-        text = f"^Password: ^{card['password']} ^| ^Konami ^ID ^#{card['konami_id']}"
+        text = f"Password: {card['password']} | Konami ID #{card['konami_id']}"
     elif not card['password'] and card['konami_id']:
-        text = f"^No ^password ^| ^Konami ^ID ^#{card['konami_id']}"
+        text = f"No password | Konami ID #{card['konami_id']}"
     elif card['password'] and not card['konami_id']:
-        text = f"^Password: ^{card['password']} ^| ^Not ^yet ^released"
+        text = f"Password: {card['password']} | Not yet released"
     else:
-        text = "^Not ^yet ^released"
+        text = "Not yet released"
 
     if card.get('fake_password') != None:
-        text += f"^Placeholder ^ID: ^{card['fake_password']}"
+        text += f"Placeholder ID: {card['fake_password']}"
 
-    return text
+    return f"^({text})"
 
 
 def generate_card_display(card: Any) -> str:
@@ -127,14 +127,14 @@ def generate_card_display(card: Any) -> str:
 
     fullText = ""
 
-    title = f"# [{card['name']['en']}]({ygoprodeck})"
+    title = f"## [{card['name']['en']}]({ygoprodeck})"
 
     fullText += title + "\n"
 
-    links = f"## 🔗 Links\n[Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
+    links = f"### 🔗 Links\n[Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
     if card['konami_id'] == None:
-        links = f"## 🔗 Links\n[Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
+        links = f"### 🔗 Links\n[Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
     description = ""
 
@@ -151,35 +151,35 @@ def generate_card_display(card: Any) -> str:
         map(lambda l: f"{l['label']}{l['value']}", filter(lambda l: l['value'] != None, limitRegulations)))
 
     if len(limitRegulationDisplay) > 0:
-        description += f"**Limit**: {limitRegulationDisplay}"
+        description += f"^(**Limit**: {limitRegulationDisplay})"
 
     description += "\n\n"
     if card['card_type'] == "Monster":
-        description += f"**Type**: {card['monster_type_line']}"
+        description += f"^(**Type**: {card['monster_type_line']})"
         description += "\n\n"
-        description += f"**Attribute**: {card['attribute']}"
+        description += f"^(**Attribute**: {card['attribute']})"
         description += "\n\n"
 
         if "rank" in card:
-            description += f"**Rank**: {card['rank']} **ATK**: {card['atk']} **DEF**: {card['def']}"
+            description += f"^(**Rank**: {card['rank']} **ATK**: {card['atk']} **DEF**: {card['def']})"
         elif "link_arrows" in card:
             arrows = "".join(card['link_arrows'])
-            description += f"**Link Rating**: {len(card['link_arrows'])} **ATK**: {card['atk']} **Link Arrows**: {arrows}"
+            description += f"^(**Link Rating**: {len(card['link_arrows'])} **ATK**: {card['atk']} **Link Arrows**: {arrows})"
         else:
-            description += f"**Level**: {card['level']} **ATK**: {card['atk']} **DEF**: {card['def']}"
+            description += f"^(**Level**: {card['level']} **ATK**: {card['atk']} **DEF**: {card['def']})"
 
         if card.get('pendulum_scale') != None:
             formattedScale = f"{card['pendulum_scale']} / {card['pendulum_scale']}"
             description += " "
-            description += f"**Pendulum Scale**: {formattedScale}"
+            description += f"^(**Pendulum Scale**: {formattedScale})"
 
-        fullText += description + "\n\n"
+        fullText += description + "\n"
 
         if card.get('pendulum_effect') != None:
-            fullText += "## Pendulum Effect\n" + \
+            fullText += "### Pendulum Effect\n" + \
                 (card['pendulum_effect']['en'] or "\u200b") + "\n"
 
-        fullText += "## Card Text\n" + (card['text']['en'] or "\u200b")
+        fullText += "### Card Text\n" + (card['text']['en'] or "\u200b")
     else:
         # Spells and Traps
 
@@ -188,7 +188,7 @@ def generate_card_display(card: Any) -> str:
 
         fullText += description + "\n\n"
 
-        fullText += "## Card Effect\n" + (card['text']['en'] or "\u200b")
+        fullText += "### Card Effect\n" + (card['text']['en'] or "\u200b")
 
     fullText += "\n\n" + links + "\n\n"
 
@@ -205,7 +205,7 @@ def reply_with_cards(
     if len(cards):
         try:
             reply: Comment = target.reply(
-                "\n\n".join(generate_card_display(card) for card in cards))
+                "\n\n----\n\n".join(generate_card_display(card) for card in cards))
             logger.info(f"{reply.id}")
             reply.disable_inbox_replies()
         except Forbidden as e:
