@@ -6,6 +6,7 @@ import re
 from os import getenv
 from platform import python_version
 from threading import Thread
+from time import sleep
 from typing import Any, Dict, List
 from urllib.parse import quote_plus
 
@@ -63,25 +64,30 @@ def run_on_comments() -> None:
 
 def run_on_mentions() -> None:
     logger = logging.getLogger("bastion-mentions")
-    logger.info("Starting")
     client = Client(http2=True, base_url=getenv("API_URL"))
     reddit = get_reddit_client()
     subreddits = getenv("SUBREDDITS").split("+")
-    for comment in reddit.inbox.mentions():
-        logger.info(f"{comment.id}|{comment.created_utc}|{comment.body}")
-        if (datetime.now(timezone.utc) - datetime.fromtimestamp(comment.created_utc, timezone.utc)).days:
-            logger.info(f"{comment.id}|Skip, too old")
-            continue
-        summons = parse_summons(comment.body)
-        logger.info(f"{comment.id}|{summons}")
-        if comment.subreddit.display_name.lower() not in subreddits:
-            cards = get_cards(client, summons)
-            logger.info(f"{comment.id}|{cards}")
-            reply_with_cards(comment, logger, cards)
-            if not len(cards):
-                on_mentioned(comment)
-        else:
-            on_mentioned(comment)
+    while True:
+        logger.info("Starting")
+        # Note: if a mention qualifies as a comment or post reply, it will not show up in this listing
+        for comment in reddit.inbox.mentions():
+            logger.info(f"{comment.id}|{comment.created_utc}|{comment.body}|{comment.new}")
+            if comment.new:
+                comment.mark_read()
+                if (datetime.now(timezone.utc) - datetime.fromtimestamp(comment.created_utc, timezone.utc)).days:
+                    logger.info(f"{comment.id}|Skip, too old")
+                    continue
+                summons = parse_summons(comment.body)
+                logger.info(f"{comment.id}|{summons}")
+                if comment.subreddit.display_name.lower() not in subreddits:
+                    cards = get_cards(client, summons)
+                    logger.info(f"{comment.id}|{cards}")
+                    reply_with_cards(comment, logger, cards)
+                    if not len(cards):
+                        on_mentioned(comment)
+                else:
+                    on_mentioned(comment)
+        sleep(15)
 
 
 summon_regex = re.compile("{{([^}]+)}}")
