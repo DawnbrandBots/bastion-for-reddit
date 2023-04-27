@@ -153,12 +153,12 @@ def generate_card_display(card: Any) -> str:
     if len(limit_regulation_display) > 0:
         description += f"^(**Limit**: {limit_regulation_display})"
 
-    description += "\n\n"
+    description += "  \n"
     if card['card_type'] == "Monster":
         description += f"^(**Type**: {card['monster_type_line']})"
-        description += "\n\n"
+        description += "  \n"
         description += f"^(**Attribute**: {card['attribute']})"
-        description += "\n\n"
+        description += "  \n"
 
         if "rank" in card:
             description += f"^(**Rank**: {card['rank']} **ATK**: {card['atk']} **DEF**: {card['def']})"
