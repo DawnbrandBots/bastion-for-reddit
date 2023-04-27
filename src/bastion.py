@@ -85,7 +85,7 @@ def get_cards(client: Client, names: List[str]) -> List[Dict[str, Any]]:
     return [client.get(f"/ocg-tcg/search?name={quote_plus(name)}").json() for name in names]
 
 
-def formatLimitRegulation(value: int | None) -> int | None:
+def format_limit_regulation(value: int | None) -> int | None:
     match value:
         case "Forbidden":
             return 0
@@ -99,7 +99,7 @@ def formatLimitRegulation(value: int | None) -> int | None:
             return None
 
 
-def formatFooter(card: Any) -> str:
+def format_footer(card: Any) -> str:
     text = ""
     if card['password'] and card['konami_id']:
         text = f"Password: {card['password']} | Konami ID #{card['konami_id']}"
@@ -117,19 +117,19 @@ def formatFooter(card: Any) -> str:
 
 
 def generate_card_display(card: Any) -> str:
-    yugipediaPage = card['konami_id'] or quote_plus(card['name']['en'])
-    yugipedia = f"https://yugipedia.com/wiki/{yugipediaPage}?utm_source=bastion"
-    ygoprodeckTerm = card['password'] or quote_plus(card['name']['en'])
-    ygoprodeck = f"https://ygoprodeck.com/card/?search={ygoprodeckTerm}&utm_source=bastion"
+    yugipedia_page = card['konami_id'] or quote_plus(card['name']['en'])
+    yugipedia = f"https://yugipedia.com/wiki/{yugipedia_page}?utm_source=bastion"
+    ygoprodeck_term = card['password'] or quote_plus(card['name']['en'])
+    ygoprodeck = f"https://ygoprodeck.com/card/?search={ygoprodeck_term}&utm_source=bastion"
     # Official database, does not work for zh locales
     official = f"https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&request_locale=en&cid={card['konami_id']}"
     rulings = f"https://www.db.yugioh-card.com/yugiohdb/faq_search.action?ope=4&request_locale=ja&cid={card['konami_id']}"
 
-    fullText = ""
+    full_text = ""
 
     title = f"## [{card['name']['en']}]({ygoprodeck})"
 
-    fullText += title + "\n"
+    full_text += title + "\n"
 
     links = f"### 🔗 Links\n[Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
@@ -138,20 +138,20 @@ def generate_card_display(card: Any) -> str:
 
     description = ""
 
-    limitRegulations = [
-        {"label": "TCG: ", "value": formatLimitRegulation(
+    limit_regulations = [
+        {"label": "TCG: ", "value": format_limit_regulation(
             card["limit_regulation"].get("tcg"))},
-        {"label": "OCG: ", "value": formatLimitRegulation(
+        {"label": "OCG: ", "value": format_limit_regulation(
             card["limit_regulation"].get("ocg"))},
-        {"label": "Speed: ", "value": formatLimitRegulation(
+        {"label": "Speed: ", "value": format_limit_regulation(
             card["limit_regulation"].get("speed"))}
     ]
 
-    limitRegulationDisplay = " / ".join(
-        map(lambda l: f"{l['label']}{l['value']}", filter(lambda l: l['value'] != None, limitRegulations)))
+    limit_regulation_display = " / ".join(
+        map(lambda l: f"{l['label']}{l['value']}", filter(lambda l: l['value'] != None, limit_regulations)))
 
-    if len(limitRegulationDisplay) > 0:
-        description += f"^(**Limit**: {limitRegulationDisplay})"
+    if len(limit_regulation_display) > 0:
+        description += f"^(**Limit**: {limit_regulation_display})"
 
     description += "\n\n"
     if card['card_type'] == "Monster":
@@ -173,28 +173,28 @@ def generate_card_display(card: Any) -> str:
             description += " "
             description += f"^(**Pendulum Scale**: {formattedScale})"
 
-        fullText += description + "\n"
+        full_text += description + "\n"
 
         if card.get('pendulum_effect') != None:
-            fullText += "### Pendulum Effect\n" + \
+            full_text += "### Pendulum Effect\n" + \
                 (card['pendulum_effect']['en'] or "\u200b") + "\n"
 
-        fullText += "### Card Text\n" + (card['text']['en'] or "\u200b")
+        full_text += "### Card Text\n" + (card['text']['en'] or "\u200b")
     else:
         # Spells and Traps
 
         description += "\n\n"
         description += f"{card['property']} {card['card_type']}"
 
-        fullText += description + "\n\n"
+        full_text += description + "\n\n"
 
-        fullText += "### Card Effect\n" + (card['text']['en'] or "\u200b")
+        full_text += "### Card Effect\n" + (card['text']['en'] or "\u200b")
 
-    fullText += "\n\n" + links + "\n\n"
+    full_text += "\n\n" + links + "\n\n"
 
-    fullText += formatFooter(card)
+    full_text += format_footer(card)
 
-    return fullText
+    return full_text
 
 
 def reply_with_cards(
