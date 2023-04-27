@@ -131,10 +131,12 @@ def generate_card_display(card: Any) -> str:
 
     full_text += title + "\n"
 
-    links = f"### 🔗 Links\n[Card Image]({card['images'][0]['image']}) | [Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
+    image_link = f"https://yugipedia.com/wiki/Special:Redirect/file/{card['images'][0]['image']}"
+
+    links = f"### 🔗 Links\n[Card Image]({image_link}) | [Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
     if card['konami_id'] == None:
-        links = f"### 🔗 Links\n[Card Image]({card['images'][0]['image']}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
+        links = f"### 🔗 Links\n[Card Image]({image_link}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
     description = ""
 
