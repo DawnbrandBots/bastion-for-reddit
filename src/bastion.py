@@ -131,10 +131,10 @@ def generate_card_display(card: Any) -> str:
 
     full_text += title + "\n"
 
-    links = f"### 🔗 Links\n[Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
+    links = f"### 🔗 Links\n[Card Image]({card['images'][0]['image']}) | [Official Konami DB]({official}) | [OCG Rulings]({rulings}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
     if card['konami_id'] == None:
-        links = f"### 🔗 Links\n[Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
+        links = f"### 🔗 Links\n[Card Image]({card['images'][0]['image']}) | [Yugipedia]({yugipedia}) | [YGOPRODECK]({ygoprodeck})"
 
     description = ""
 
