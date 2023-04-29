@@ -72,7 +72,7 @@ def run_on_mentions() -> None:
         logger.info("Starting")
         # Note: if a mention qualifies as a comment or post reply, it will not show up in this listing
         for comment in reddit.inbox.mentions():
-            logger.info(f"{comment.id}|{comment.created_utc}|{comment.body}|{comment.new}")
+            logger.info(f"{comment.id}|{comment.context}|{comment.created_utc}{comment.new}")
             if comment.new:
                 comment.mark_read()
                 if (datetime.now(timezone.utc) - datetime.fromtimestamp(comment.created_utc, timezone.utc)).days:
