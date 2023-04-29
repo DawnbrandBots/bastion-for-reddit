@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
+from datetime import datetime, timezone
 import logging
 import re
 from os import getenv
 from platform import python_version
 from threading import Thread
+from time import sleep
 from typing import Any, Dict, List
 from urllib.parse import quote_plus
 
@@ -13,6 +15,8 @@ from dotenv import load_dotenv
 from httpx import Client
 from praw.models import Comment
 from prawcore import Forbidden
+
+from mention import on_mentioned
 
 
 def user_agent() -> str:
@@ -64,15 +68,27 @@ def run_on_mentions() -> None:
     client = Client(http2=True, base_url=getenv("API_URL"))
     reddit = get_reddit_client()
     subreddits = getenv("SUBREDDITS").split("+")
-    for comment in reddit.inbox.mentions():
-        logger.info(f"{comment.id}|{comment.created_utc}|{comment.body}")
-        if comment.subreddit.display_name.lower() not in subreddits:
-            summons = parse_summons(comment.body)
-            logger.info(f"{comment.id}|{summons}")
-            cards = get_cards(client, summons)
-            logger.info(f"{comment.id}|{cards}")
-            reply_with_cards(comment, logger, cards)
-
+    while True:
+        logger.info("Starting")
+        # Note: if a mention qualifies as a comment or post reply, it will not show up in this listing
+        for comment in reddit.inbox.mentions():
+            logger.info(f"{comment.id}|{comment.context}|{comment.created_utc}{comment.new}")
+            if comment.new:
+                comment.mark_read()
+                if (datetime.now(timezone.utc) - datetime.fromtimestamp(comment.created_utc, timezone.utc)).days:
+                    logger.info(f"{comment.id}|Skip, too old")
+                    continue
+                summons = parse_summons(comment.body)
+                logger.info(f"{comment.id}|{summons}")
+                if comment.subreddit.display_name.lower() not in subreddits:
+                    cards = get_cards(client, summons)
+                    logger.info(f"{comment.id}|{cards}")
+                    reply_with_cards(comment, logger, cards)
+                    if not len(cards):
+                        on_mentioned(comment)
+                else:
+                    on_mentioned(comment)
+        sleep(15)
 
 summon_regex = re.compile("{{([^}]+)}}")
 
@@ -217,12 +233,12 @@ def reply_with_cards(
 def main():
     logging.basicConfig(level=logging.INFO)
     load_dotenv()
-    submissions_thread = Thread(
-        target=run_on_submissions, name="submissions")
+    submissions_thread = Thread(target=run_on_submissions, name="submissions")
     comments_thread = Thread(target=run_on_comments, name="comments")
-    # mentions_thread = Thread(target=run_on_mentions, name="mentions")
+    mentions_thread = Thread(target=run_on_mentions, name="mentions")
     submissions_thread.start()
     comments_thread.start()
+    mentions_thread.start()
 
 
 if __name__ == "__main__":
