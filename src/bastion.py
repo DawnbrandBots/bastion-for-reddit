@@ -5,7 +5,7 @@ import logging
 import re
 from os import getenv
 from platform import python_version
-from threading import Thread
+from threading import current_thread, Thread
 from time import sleep
 from typing import Any, Dict, List
 from urllib.parse import quote_plus
@@ -16,6 +16,7 @@ from httpx import Client
 from praw.models import Comment
 from prawcore import Forbidden
 
+from antiabuse import already_replied_to_comment, already_replied_to_submission
 from mention import on_mentioned
 
 
@@ -35,28 +36,33 @@ def get_reddit_client() -> praw.Reddit:
 
 
 def run_on_submissions() -> None:
-    logger = logging.getLogger("bastion-submissions")
+    logger = logging.getLogger(current_thread().name)
     client = Client(http2=True, base_url=getenv("API_URL"))
     reddit = get_reddit_client()
     subreddits = reddit.subreddit(getenv("SUBREDDITS"))
     for submission in subreddits.stream.submissions():
-        logger.info(
-            f"{submission.id}|{submission.created_utc}|{submission.title}")
+        logger.info(f"{submission.id}|{submission.permalink}|{submission.created_utc}")
         summons = parse_summons(submission.selftext)
         logger.info(f"{submission.id}|{summons}")
+        if len(summons) and already_replied_to_submission(submission):
+            logger.info(f"{submission.id}|Skip")
+            continue
         cards = get_cards(client, summons)
         logger.info(f"{submission.id}|{cards}")
         reply_with_cards(submission, logger, cards)
 
 
 def run_on_comments() -> None:
-    logger = logging.getLogger("bastion-comments")
+    logger = logging.getLogger(current_thread().name)
     client = Client(http2=True, base_url=getenv("API_URL"))
     reddit = get_reddit_client()
     subreddits = reddit.subreddit(getenv("SUBREDDITS"))
     for comment in subreddits.stream.comments():
-        logger.info(f"{comment.id}|{comment.created_utc}|{comment.body}")
+        logger.info(f"{comment.id}|{comment.permalink}|{comment.created_utc}")
         summons = parse_summons(comment.body)
+        if len(summons) and already_replied_to_comment(comment):
+            logger.info(f"{comment.id}|Skip")
+            continue
         logger.info(f"{comment.id}|{summons}")
         cards = get_cards(client, summons)
         logger.info(f"{comment.id}|{cards}")
@@ -64,7 +70,7 @@ def run_on_comments() -> None:
 
 
 def run_on_mentions() -> None:
-    logger = logging.getLogger("bastion-mentions")
+    logger = logging.getLogger(current_thread().name)
     client = Client(http2=True, base_url=getenv("API_URL"))
     reddit = get_reddit_client()
     subreddits = getenv("SUBREDDITS").split("+")
@@ -72,7 +78,7 @@ def run_on_mentions() -> None:
         logger.info("Starting")
         # Note: if a mention qualifies as a comment or post reply, it will not show up in this listing
         for comment in reddit.inbox.mentions():
-            logger.info(f"{comment.id}|{comment.context}|{comment.created_utc}{comment.new}")
+            logger.info(f"{comment.id}|{comment.context}|{comment.created_utc}|{comment.new}")
             if comment.new:
                 comment.mark_read()
                 if (datetime.now(timezone.utc) - datetime.fromtimestamp(comment.created_utc, timezone.utc)).days:
@@ -238,7 +244,7 @@ def main():
     mentions_thread = Thread(target=run_on_mentions, name="mentions")
     submissions_thread.start()
     comments_thread.start()
-    mentions_thread.start()
+    #mentions_thread.start()
 
 
 if __name__ == "__main__":
