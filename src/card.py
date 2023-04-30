@@ -2,6 +2,8 @@ import re
 from typing import Any, List, Dict, TYPE_CHECKING
 from urllib.parse import quote_plus
 
+from footer import FOOTER
+
 
 if TYPE_CHECKING:
     from httpx import Client
@@ -50,14 +52,16 @@ def format_footer(card: Any) -> str:
 
 def generate_card_display(card: Any) -> str:
     yugipedia_page = card['konami_id'] or quote_plus(card['name']['en'])
-    yugipedia = f"https://yugipedia.com/wiki/{yugipedia_page}?utm_source=bastion"
+    yugipedia = f"https://yugipedia.com/wiki/{yugipedia_page}?utm_source=bastion&utm_medium=reddit"
     ygoprodeck_term = card['password'] or quote_plus(card['name']['en'])
-    ygoprodeck = f"https://ygoprodeck.com/card/?search={ygoprodeck_term}&utm_source=bastion"
-    image_link = f"https://yugipedia.com/wiki/Special:Redirect/file/{card['images'][0]['image']}"
+    ygoprodeck = f"https://ygoprodeck.com/card/?search={ygoprodeck_term}&utm_source=bastion&utm_medium=reddit"
 
     full_text = f"## [{card['name']['en']}]({ygoprodeck})\n"
 
-    links = f"### 🔗 Links\n[Card Image]({image_link}) | "
+    links = f"### 🔗 Links\n"
+    if card.get('images'):
+        image_link = f"https://yugipedia.com/wiki/Special:Redirect/file/{card['images'][0]['image']}?utm_source=bastion&utm_medium=reddit"
+        links += f"[Card Image]({image_link}) | "
     if card['konami_id'] is not None:
         # Official database, does not work for zh locales
         official = f"https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&request_locale=en&cid={card['konami_id']}"
@@ -115,4 +119,4 @@ def generate_card_display(card: Any) -> str:
 
 
 def display_cards(cards: List[Any]) -> str:
-    return "\n\n----\n\n".join(generate_card_display(card) for card in cards)
+    return "\n\n----\n\n".join(generate_card_display(card) for card in cards) + FOOTER

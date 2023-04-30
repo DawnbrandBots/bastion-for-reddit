@@ -4,7 +4,7 @@ from typing import Generator, Generic, List, TypeVar, TYPE_CHECKING
 
 from antiabuse import already_replied_to_comment, already_replied_to_submission
 from card import parse_summons, get_cards, display_cards
-from thread import BotThread
+from bot_thread import BotThread
 
 
 if TYPE_CHECKING:
