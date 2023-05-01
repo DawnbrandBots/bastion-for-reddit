@@ -1,0 +1,42 @@
+name: Release to production (Compose)
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: "GitHub commit SHA"
+        required: false
+        default: ""
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure SSH
+        # https://docs.docker.com/engine/context/working-with-contexts/
+        # This avoids passing an -H parameter to every Docker CLI call and modifying the wait script
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRODUCTION_HOST_KEY }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.PRODUCTION_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+          echo "${{ secrets.PRODUCTION_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod -R g-rwx,o-rwx ~/.ssh
+          docker context create deploy-target --docker host=ssh://${{ secrets.PRODUCTION_DEPLOY_USER }}@${{ secrets.PRODUCTION_DEPLOY_HOST }}
+          docker context use deploy-target
+      - name: Deploy with Docker Compose
+        env:
+          # docker/metadata-action type=sha,format=long
+          DOCKER_TAG: sha-${{ github.event.inputs.revision || github.sha }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          API_URL: ${{ secrets.API_URL }}
+        run: |
+          docker-compose pull
+          docker-compose up -d
