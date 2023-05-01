@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
+from collections import Counter
 from datetime import datetime, timezone
 import logging
 from threading import Thread
@@ -17,16 +18,22 @@ if TYPE_CHECKING:
 
 
 class BotThread(Thread):
+    # https://github.com/DawnbrandBots/bastion-for-reddit/issues/13
+    MAX_REPLIES_PER_SUBMISSION = 10
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._logger = logging.getLogger(self.name)
         self._client = get_api_client()
         self._reddit = get_reddit_client()
+        # Actually irrelevant for SubmissionsThread
+        self._reply_counter = Counter()
 
     def _reply(self, target: Union["Comment", "Submission"], text: str) -> None:
         try:
             reply: "Comment" = target.reply(text)
             self._logger.info(f"{target.id}: posted reply {reply.id}")
+            self._reply_counter[target.submission.id] += 1
             reply.disable_inbox_replies()
         except Forbidden as e:
             self._logger.warning(f"{target.id}: reply forbidden", exc_info=e)
@@ -36,6 +43,7 @@ class BotThread(Thread):
                     self._logger.warning(f"{target.id}: reply too long", exc_info=e)
                     reply: "Comment" = target.reply(f"Sorry, the cards are too long to fit into one comment.{FOOTER}")
                     self._logger.info(f"{target.id}: posted error {reply.id}")
+                    self._reply_counter[target.submission.id] += 1
                     reply.disable_inbox_replies()
                     return
             self._logger.error(f"{target.id}: reply failure", exc_info=e)

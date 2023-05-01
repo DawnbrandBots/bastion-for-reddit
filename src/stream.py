@@ -60,6 +60,9 @@ class CommentsThread(StreamThread["Comment"]):
         if is_author_me(comment):
             self._logger.info(f"{comment.id}: skip, self")
             return []
+        if self._reply_counter[comment.submission.id] >= self.MAX_REPLIES_PER_SUBMISSION:
+            self._logger.warning(f"{comment.id}: skip, exceeded limit for {comment.submission.id}")
+            return []
         summons = parse_summons(comment.body)
         self._logger.info(f"{comment.id}| summons: {summons}")
         if len(summons):

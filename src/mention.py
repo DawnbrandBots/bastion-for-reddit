@@ -35,6 +35,9 @@ class MentionsThread(BotThread):
                 continue
             self._logger.info(f"{comment.id}|{comment.context}|{timestamp_to_iso(comment.created_utc)}")
             comment.mark_read()
+            if self._reply_counter[comment.submission.id] >= self.MAX_REPLIES_PER_SUBMISSION:
+                self._logger.warning(f"{comment.id}: skip, exceeded limit for {comment.submission.id}")
+                continue
             if is_summon_chain(comment):
                 self._logger.info(f"{comment.id}: skip, parent comment is me")
                 continue

@@ -39,6 +39,3 @@ def already_replied_to_comment(comment: "Comment") -> bool:
     # https://praw.readthedocs.io/en/latest/code_overview/models/comment.html#praw.models.Comment.replies
     comment.refresh()
     return is_my_reply_in_comments(comment.replies)
-
-
-# TODO: maximum number of comments per submission
