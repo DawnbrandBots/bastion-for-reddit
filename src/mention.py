@@ -5,9 +5,10 @@ from typing import TYPE_CHECKING
 
 from praw.models.util import stream_generator
 
+from antiabuse import is_summon_chain
+from bot_thread import BotThread, timestamp_to_iso
 from card import parse_summons, get_cards, display_cards
 from footer import FOOTER
-from bot_thread import BotThread
 
 
 if TYPE_CHECKING:
@@ -30,18 +31,21 @@ class MentionsThread(BotThread):
         # Note: if a mention qualifies as a comment or post reply, it will not show up in this listing
         for comment in stream_generator(self._reddit.inbox.mentions):
             if not comment.new:
-                self._logger.info(f"{comment.id}|{comment.context}|Skip")
+                self._logger.info(f"{comment.id}|{comment.context}| skip, read")
                 continue
-            self._logger.info(f"{comment.id}|{comment.context}|{comment.created_utc}")
+            self._logger.info(f"{comment.id}|{comment.context}|{timestamp_to_iso(comment.created_utc)}")
             comment.mark_read()
+            if is_summon_chain(comment):
+                self._logger.info(f"{comment.id}: skip, parent comment is me")
+                continue
             summons = parse_summons(comment.body)
-            self._logger.info(f"{comment.id}|{summons}")
+            self._logger.info(f"{comment.id}| summons: {summons}")
             if not len(summons):
                 self._reply(comment, INFO)
                 continue
             if comment.subreddit.display_name.lower() not in subreddits:
                 cards = get_cards(self._client, summons)
-                self._logger.info(f"{comment.id}|{cards}")
+                self._logger.info(f"{comment.id}| cards: {cards}")
                 if not len(cards):
                     self._reply(comment, INFO)
                 else:

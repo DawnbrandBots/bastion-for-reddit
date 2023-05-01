@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
+from datetime import datetime, timezone
 import logging
 from threading import Thread
 from typing import Union, TYPE_CHECKING
@@ -49,3 +50,7 @@ class BotThread(Thread):
                 self._run()
             except Exception as e:
                 self._logger.error("Exception in thread", exc_info=e)
+
+
+def timestamp_to_iso(created_utc: float) -> str:
+    return datetime.fromtimestamp(created_utc, timezone.utc).isoformat()

@@ -4,10 +4,9 @@ from abc import abstractmethod
 from os import getenv
 from typing import Generator, Generic, List, TypeVar, TYPE_CHECKING
 
-from antiabuse import already_replied_to_comment, already_replied_to_submission
+from antiabuse import already_replied_to_comment, already_replied_to_submission, is_author_me, is_summon_chain
 from card import parse_summons, get_cards, display_cards
-from bot_thread import BotThread
-
+from bot_thread import BotThread, timestamp_to_iso
 
 if TYPE_CHECKING:
     from praw.models import Comment, Submission
@@ -23,11 +22,11 @@ class StreamThread(Generic[Post], BotThread):
 
     def _main_loop(self, stream: Generator[Post, None, None]):
         for post in stream:
-            self._logger.info(f"{post.id}|{post.permalink}|{post.created_utc}")
+            self._logger.info(f"{post.id}|{post.permalink}|{timestamp_to_iso(post.created_utc)}")
             summons = self._parse_summons(post)
             if len(summons):
                 cards = get_cards(self._client, summons)
-                self._logger.info(f"{post.id}|{cards}")
+                self._logger.info(f"{post.id}| cards: {cards}")
                 if len(cards):
                     reply = display_cards(cards)
                     self._reply(post, reply)
@@ -38,11 +37,11 @@ class SubmissionsThread(StreamThread["Submission"]):
         super().__init__(name="submissions")
 
     # @override
-    def _parse_summons(self, post):
-        summons = parse_summons(post.selftext)
-        self._logger.info(f"{post.id}|{summons}")
-        if len(summons) and already_replied_to_submission(post):
-            self._logger.info(f"{post.id}|Skip")
+    def _parse_summons(self, submission):
+        summons = parse_summons(submission.selftext)
+        self._logger.info(f"{submission.id}| summons: {summons}")
+        if len(summons) and already_replied_to_submission(submission):
+            self._logger.info(f"{submission.id}: skip, already replied")
             return []
         return summons
 
@@ -57,12 +56,19 @@ class CommentsThread(StreamThread["Comment"]):
         super().__init__(name="comments")
 
     # @override
-    def _parse_summons(self, post):
-        summons = parse_summons(post.body)
-        self._logger.info(f"{post.id}|{summons}")
-        if len(summons) and already_replied_to_comment(post):
-            self._logger.info(f"{post.id}|Skip")
+    def _parse_summons(self, comment):
+        if is_author_me(comment):
+            self._logger.info(f"{comment.id}: skip, self")
             return []
+        summons = parse_summons(comment.body)
+        self._logger.info(f"{comment.id}| summons: {summons}")
+        if len(summons):
+            if already_replied_to_comment(comment):
+                self._logger.info(f"{comment.id}: skip, already replied")
+                return []
+            if is_summon_chain(comment):
+                self._logger.info(f"{comment.id}: skip, parent comment is me")
+                return []
         return summons
 
     # @override

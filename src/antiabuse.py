@@ -14,9 +14,9 @@ def is_author_me(comment: "Comment") -> bool:
 
 def is_summon_chain(comment: "Comment") -> bool:
     """
-    Returns True if the grandparent comment is authored by self, to prevent looping
-    :param comment:
-    :return:
+    Returns True if the grandparent comment is authored by self, to prevent looping.
+    This is naïve and will not prevent loops with more intervening comments,
+    e.g. Bastion -> Bot A -> Bot B summons Bastion
     """
     if comment.is_root:
         return False
