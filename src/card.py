@@ -28,7 +28,9 @@ def parse_summons(text: str) -> List[str]:
 
 
 def get_cards(client: "Client", names: List[str]) -> List[Dict[str, Any]]:
-    return [client.get(f"/ocg-tcg/search?name={quote_plus(name)}").json() for name in names]
+    # Could be parallelized, even in a synchronous context
+    responses = [client.get(f"/ocg-tcg/search?name={quote_plus(name)}") for name in names]
+    return [response.json() for response in responses if response.status_code == 200]
 
 
 def format_limit_regulation(value: int | None) -> int | None:
