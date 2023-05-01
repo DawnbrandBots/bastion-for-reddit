@@ -13,7 +13,13 @@ summon_regex = re.compile("{{([^}]+)}}")
 
 
 def parse_summons(text: str) -> List[str]:
-    return summon_regex.findall(text)
+    """
+    Returns a list of all unique tokens found enclosed by {{ }}, stripping surrounding whitespace
+    and ignoring blanks and case-insensitive repeats.
+    """
+    summons: List[str] = summon_regex.findall(text)
+    summons = [summon.strip() for summon in summons]
+    return [*set(summon.lower() for summon in summons if summon)]
 
 
 def get_cards(client: "Client", names: List[str]) -> List[Dict[str, Any]]:

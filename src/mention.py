@@ -28,20 +28,22 @@ class MentionsThread(BotThread):
         self._logger.info("Starting")
         # Note: if a mention qualifies as a comment or post reply, it will not show up in this listing
         for comment in stream_generator(self._reddit.inbox.mentions):
-            if comment.new:
-                self._logger.info(f"{comment.id}|{comment.context}|{comment.created_utc}")
-                comment.mark_read()
-                summons = parse_summons(comment.body)
-                self._logger.info(f"{comment.id}|{summons}")
-                if not len(summons):
+            if not comment.new:
+                self._logger.info(f"{comment.id}|{comment.context}|Skip")
+                continue
+            self._logger.info(f"{comment.id}|{comment.context}|{comment.created_utc}")
+            comment.mark_read()
+            summons = parse_summons(comment.body)
+            self._logger.info(f"{comment.id}|{summons}")
+            if not len(summons):
+                self._reply(comment, INFO)
+                continue
+            if comment.subreddit.display_name.lower() not in subreddits:
+                cards = get_cards(self._client, summons)
+                self._logger.info(f"{comment.id}|{cards}")
+                if not len(cards):
                     self._reply(comment, INFO)
-                    continue
-                if comment.subreddit.display_name.lower() not in subreddits:
-                    cards = get_cards(self._client, summons)
-                    self._logger.info(f"{comment.id}|{cards}")
-                    if not len(cards):
-                        self._reply(comment, INFO)
-                    else:
-                        reply = display_cards(cards)
-                        self._reply(comment, reply)
-                # Other case should be handled by CommentsThread
+                else:
+                    reply = display_cards(cards)
+                    self._reply(comment, reply)
+            # Other case should be handled by CommentsThread
