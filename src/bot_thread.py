@@ -5,8 +5,10 @@ from threading import Thread
 from typing import Union, TYPE_CHECKING
 
 from prawcore import Forbidden
+from praw.exceptions import RedditAPIException
 
 from clients import get_api_client, get_reddit_client
+from footer import FOOTER
 
 
 if TYPE_CHECKING:
@@ -27,6 +29,15 @@ class BotThread(Thread):
             reply.disable_inbox_replies()
         except Forbidden as e:
             self._logger.warning(f"{target.id}: reply forbidden", exc_info=e)
+        except RedditAPIException as e:
+            for item in e.items:
+                if item.error_type == "TOO_LONG":
+                    self._logger.warning(f"{target.id}: reply too long", exc_info=e)
+                    reply: "Comment" = target.reply(f"Sorry, the cards are too long to fit into one comment.{FOOTER}")
+                    self._logger.info(f"{target.id}: posted error {reply.id}")
+                    reply.disable_inbox_replies()
+                    return
+            self._logger.error(f"{target.id}: reply failure", exc_info=e)
 
     def _run(self) -> None:
         raise NotImplementedError
