@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-Licence-Identifier: AGPL-3.0-or-later
 import re
 from typing import Any, List, Dict, TYPE_CHECKING
 from urllib.parse import quote_plus

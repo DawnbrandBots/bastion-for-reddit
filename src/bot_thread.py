@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-Licence-Identifier: AGPL-3.0-or-later
 import logging
 from threading import Thread
 from typing import Union, TYPE_CHECKING

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-Licence-Identifier: AGPL-3.0-or-later
 from os import getenv
 from platform import python_version
 from typing import Literal

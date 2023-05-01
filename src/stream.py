@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-Licence-Identifier: AGPL-3.0-or-later
 from abc import abstractmethod
 from os import getenv
 from typing import Generator, Generic, List, TypeVar, TYPE_CHECKING
