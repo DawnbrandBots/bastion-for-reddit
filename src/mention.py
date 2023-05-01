@@ -25,9 +25,8 @@ class MentionsThread(BotThread):
         super().__init__(name="mentions")
 
     # @override
-    def run(self) -> None:
+    def _run(self) -> None:
         subreddits = getenv("SUBREDDITS").split("+")
-        self._logger.info("Starting")
         # Note: if a mention qualifies as a comment or post reply, it will not show up in this listing
         for comment in stream_generator(self._reddit.inbox.mentions):
             if not comment.new:

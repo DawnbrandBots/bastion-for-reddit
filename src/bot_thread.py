@@ -28,3 +28,13 @@ class BotThread(Thread):
         except Forbidden as e:
             self._logger.warning(f"{target.id}: reply forbidden", exc_info=e)
 
+    def _run(self) -> None:
+        raise NotImplementedError
+
+    def run(self) -> None:
+        while True:
+            self._logger.info("Starting")
+            try:
+                self._run()
+            except Exception as e:
+                self._logger.error("Exception in thread", exc_info=e)

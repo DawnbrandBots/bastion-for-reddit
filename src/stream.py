@@ -47,9 +47,8 @@ class SubmissionsThread(StreamThread["Submission"]):
         return summons
 
     # @override
-    def run(self) -> None:
+    def _run(self) -> None:
         subreddits = self._reddit.subreddit(getenv("SUBREDDITS"))
-        self._logger.info("Starting")
         self._main_loop(subreddits.stream.submissions())
 
 
@@ -67,7 +66,6 @@ class CommentsThread(StreamThread["Comment"]):
         return summons
 
     # @override
-    def run(self) -> None:
+    def _run(self) -> None:
         subreddits = self._reddit.subreddit(getenv("SUBREDDITS"))
-        self._logger.info("Starting")
         self._main_loop(subreddits.stream.comments())
