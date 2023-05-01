@@ -14,12 +14,12 @@ summon_regex = re.compile("{{([^}]+)}}")
 
 def parse_summons(text: str) -> List[str]:
     """
-    Returns a list of all unique tokens found enclosed by {{ }}, stripping surrounding whitespace
-    and ignoring blanks and case-insensitive repeats.
+    Returns a list of all unique tokens found enclosed by {{ }} in order of appearance,
+    stripping surrounding whitespace and ignoring blanks and case-insensitive repeats.
     """
     summons: List[str] = summon_regex.findall(text)
     summons = [summon.strip() for summon in summons]
-    return [*set(summon.lower() for summon in summons if summon)]
+    return list(dict.fromkeys(summon.lower() for summon in summons if summon))
 
 
 def get_cards(client: "Client", names: List[str]) -> List[Dict[str, Any]]:
@@ -38,6 +38,10 @@ def format_limit_regulation(value: int | None) -> int | None:
             return 3
         case _:
             return None
+
+
+def format_card_text(text: str | None) -> str:
+    return text.replace("\n", "\n\n") if text else "\u200b"
 
 
 def format_footer(card: Any) -> str:
@@ -64,7 +68,7 @@ def generate_card_display(card: Any) -> str:
 
     full_text = f"## [{card['name']['en']}]({ygoprodeck})\n"
 
-    links = f"### 🔗 Links\n"
+    links = ""
     if card.get('images'):
         image_link = f"https://yugipedia.com/wiki/Special:Redirect/file/{card['images'][0]['image']}?utm_source=bastion&utm_medium=reddit"
         links += f"[Card Image]({image_link}) | "
@@ -105,22 +109,19 @@ def generate_card_display(card: Any) -> str:
             description += " "
             description += f"^(**Pendulum Scale**: {formatted_scale})"
 
-        full_text += description + "\n"
+        full_text += f"{description}\n\n"
 
         if card.get('pendulum_effect') != None:
-            full_text += "### Pendulum Effect\n" + (card['pendulum_effect']['en'] or "\u200b") + "\n"
+            full_text += f"**Pendulum Effect**\n\n{format_card_text(card['pendulum_effect']['en'])}\n\n"
 
-        full_text += "### Card Text\n" + (card['text']['en'] or "\u200b")
+        full_text += f"**Card Text**\n\n{format_card_text(card['text']['en'])}"
     else:
         # Spells and Traps
         description += "\n\n"
         description += f"{card['property']} {card['card_type']}"
-        full_text += description + "\n\n"
-        full_text += "### Card Effect\n" + (card['text']['en'] or "\u200b")
+        full_text += f"{description}\n\n**Card Text**\n\n{format_card_text(card['text']['en'])}"
 
-    full_text += "\n\n" + links + "\n\n"
-    full_text += format_footer(card)
-
+    full_text += f"\n\n{links}\n\n{format_footer(card)}"
     return full_text
 
 
