@@ -12,16 +12,19 @@ if TYPE_CHECKING:
 
 
 summon_regex = re.compile("{{([^}]+)}}")
+# TODO: https://github.com/DawnbrandBots/bastion-for-reddit/issues/12
+summon_limit = 5
 
 
 def parse_summons(text: str) -> List[str]:
     """
     Returns a list of all unique tokens found enclosed by {{ }} in order of appearance,
     stripping surrounding whitespace and ignoring blanks and case-insensitive repeats.
+    Currently limited to `summon_limit` items.
     """
     summons: List[str] = summon_regex.findall(text)
     summons = [summon.strip() for summon in summons]
-    return list(dict.fromkeys(summon.lower() for summon in summons if summon))
+    return list(dict.fromkeys(summon.lower() for summon in summons if summon))[:summon_limit]
 
 
 def get_cards(client: "Client", names: List[str]) -> List[Dict[str, Any]]:
