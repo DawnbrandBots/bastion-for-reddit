@@ -7,7 +7,7 @@ services:
       REDDIT_CLIENT_SECRET:
       REDDIT_USERNAME: BastionBotYuGiOh
       REDDIT_PASSWORD:
-      SUBREDDITS: yugioh
+      SUBREDDITS: yugioh+YuGiOhMemes
       API_URL:
     logging:
       driver: "${DOCKER_LOG_DRIVER:-journald}"

@@ -4,7 +4,27 @@ A free and open-source Reddit bot for looking up cards and other useful informat
 _Yu-Gi-Oh! Trading Card Game_ and _Official Card Game_. This is a port of the
 [Discord bot](https://github.com/DawnbrandBots/bastion-bot).
 
-## Getting started
+[Announcement post on /r/yugioh](https://reddit.com/r/yugioh/comments/139u4wb/the_bastion_card_bot_is_now_available_on_this/).
+
+## Usage
+
+Summon [/u/BastionBotYuGiOh](https://reddit.com/u/BastionBotYuGiOh) in your submissions and comments on related subreddits
+with doubled curly braces, e.g. `{{Tindangle Jhrelth}}`. This is a fuzzy search on OCG and TCG cards and their prereleases.
+To summon Bastion elsewhere on Reddit, you can mention the bot user in your comments that contain curly brace search terms.
+If [/u/BastionBotYuGiOh](https://reddit.com/u/BastionBotYuGiOh) is mentioned without any search terms, it will reply with
+a short explanation about itself.
+
+For bot safety, currently Bastion is tuned very conservatively to prevent bad behaviour,
+so it will ignore any summons in replies to its comments,
+there is a maximum of five card searches per submission or comment,
+and it will comment a maximum of 10 times per submission, resetting when the program is restarted.
+
+### Subreddits
+
+- [/r/yugioh](https://reddit.com/r/yugioh)
+- [/r/YuGiOhMemes](https://reddit.com/r/YuGiOhMemes)
+
+## Getting started with development
 
 Create a Python 3 [virtualenv](https://virtualenv.pypa.io) and install dependencies with
 [pip-tools](https://github.com/jazzband/pip-tools):
