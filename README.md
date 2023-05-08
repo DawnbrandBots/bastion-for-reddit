@@ -23,6 +23,7 @@ and it will comment a maximum of 10 times per submission, resetting when the pro
 
 - [/r/yugioh](https://reddit.com/r/yugioh)
 - [/r/YuGiOhMemes](https://reddit.com/r/YuGiOhMemes)
+- [/r/Yugioh101](https://reddit.com/r/Yugioh101)
 
 ## Getting started with development
 
@@ -42,9 +43,9 @@ Configure a [`.env`](https://pypi.org/project/python-dotenv) file with the crede
 ```dotenv
 REDDIT_CLIENT_ID=
 REDDIT_CLIENT_SECRET=
-REDDIT_USERNAME=
+REDDIT_USERNAME=BastionBotYuGiOh
 REDDIT_PASSWORD=
-SUBREDDITS=yugioh+yugioh101
+SUBREDDITS=bastionbot
 API_URL=
 ```
 
