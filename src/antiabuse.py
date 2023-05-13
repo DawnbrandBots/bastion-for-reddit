@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 def is_author_me(comment: "Comment") -> bool:
-    return comment.author.name == comment._reddit.user.me().name
+    return comment.author is not None and comment.author.name == comment._reddit.user.me().name
 
 
 def is_summon_chain(comment: "Comment") -> bool:
