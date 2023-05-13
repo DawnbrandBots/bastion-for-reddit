@@ -33,7 +33,8 @@ class BotThread(Thread):
         try:
             reply: "Comment" = target.reply(text)
             self._logger.info(f"{target.id}: posted reply {reply.id}")
-            self._reply_counter[target.submission.id] += 1
+            if hasattr(target, "submission"):
+                self._reply_counter[target.submission.id] += 1
             reply.disable_inbox_replies()
         except Forbidden as e:
             self._logger.warning(f"{target.id}: reply forbidden", exc_info=e)
