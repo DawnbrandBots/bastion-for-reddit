@@ -91,7 +91,7 @@ def generate_card_display(card: Any) -> str:
     limit_regulations = [
         {"label": "TCG: ", "value": format_limit_regulation(card["limit_regulation"].get("tcg"))},
         {"label": "OCG: ", "value": format_limit_regulation(card["limit_regulation"].get("ocg"))},
-        {"label": "Speed: ", "value": format_limit_regulation(card["limit_regulation"].get("speed"))}
+        {"label": "Speed: ", "value": card["limit_regulation"].get("speed")}
     ]
 
     limit_regulation_display = " / ".join(f"{reg['label']}{reg['value']}" for reg in limit_regulations if reg["value"] is not None)
