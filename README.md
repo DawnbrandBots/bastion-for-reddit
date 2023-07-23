@@ -27,6 +27,7 @@ and it will comment a maximum of 10 times per submission, resetting when the pro
 - [/r/yugioh](https://reddit.com/r/yugioh)
 - [/r/YuGiOhMemes](https://reddit.com/r/YuGiOhMemes)
 - [/r/Yugioh101](https://reddit.com/r/Yugioh101)
+- [/r/YuGiOhMasterDuel](https://reddit.com/r/YuGiOhMasterDuel)
 
 ## Getting started with development
 
