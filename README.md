@@ -6,6 +6,9 @@ _Yu-Gi-Oh! Trading Card Game_ and _Official Card Game_. This is a port of the
 
 [Announcement post on /r/yugioh](https://reddit.com/r/yugioh/comments/139u4wb/the_bastion_card_bot_is_now_available_on_this/).
 
+[![Build Docker image](https://github.com/DawnbrandBots/bastion-for-reddit/actions/workflows/docker.yml/badge.svg)](https://github.com/DawnbrandBots/bastion-for-reddit/actions/workflows/docker.yml)
+[![Release to production (Compose)](https://github.com/DawnbrandBots/bastion-for-reddit/actions/workflows/release-compose.yml/badge.svg)](https://github.com/DawnbrandBots/bastion-for-reddit/actions/workflows/release-compose.yml)
+
 ## Usage
 
 Summon [/u/BastionBotYuGiOh](https://reddit.com/u/BastionBotYuGiOh) in your submissions and comments on related subreddits
