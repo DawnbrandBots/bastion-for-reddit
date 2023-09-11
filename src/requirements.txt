@@ -13,17 +13,15 @@ certifi==2023.7.22
     #   requests
 charset-normalizer==3.2.0
     # via requests
-exceptiongroup==1.1.2
-    # via anyio
 h11==0.14.0
     # via httpcore
 h2==4.1.0
     # via httpx
 hpack==4.0.0
     # via h2
-httpcore==0.17.3
+httpcore==0.18.0
     # via httpx
-httpx[http2]==0.24.1
+httpx[http2]==0.25.0
     # via -r requirements.in
 hyperframe==6.0.1
     # via h2
