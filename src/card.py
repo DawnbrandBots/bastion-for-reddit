@@ -47,6 +47,13 @@ def format_limit_regulation(value: int | None) -> int | None:
             return None
 
 
+MASTER_DUEL_RARITY = {
+    "N": "Common",
+    "R": "Rare",
+    "SR": "Super Rare",
+    "UR": "Ultra Rare"
+}
+
 def format_card_text(text: str | None) -> str:
     return text.replace("\n", "\n\n") if text else "\u200b"
 
@@ -98,6 +105,11 @@ def generate_card_display(card: Any) -> str:
 
     if len(limit_regulation_display) > 0:
         description += f"^(**Limit**: {limit_regulation_display})  \n"
+
+    if card.get("master_duel_rarity"):
+        md_rarity_code = card["master_duel_rarity"]
+        md_rarity = MASTER_DUEL_RARITY[md_rarity_code]
+        description += f"^(**Master Duel rarity**: {md_rarity} &#40;{md_rarity_code}&#41;)  \n"
 
     if card['card_type'] == "Monster":
         description += f"^(**Type**: {card['monster_type_line']})  \n"
