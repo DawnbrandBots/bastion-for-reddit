@@ -11,11 +11,7 @@ from card import parse_summons, get_cards, display_cards
 from footer import FOOTER
 
 
-if TYPE_CHECKING:
-    from praw.models import Comment
-
-
-INFO = f"""Free and open source _Yu-Gi-Oh!_ bot. Use {{card name}} in your posts and comments to have me reply with card information.
+INFO = f"""Free and open source _Yu-Gi-Oh!_ bot. Use {{{{card name}}}} in your posts and comments to have me reply with card information.
 Also works outside of Yu-Gi-Oh! subreddits if you mention me in the comment.
 {FOOTER}
 """
