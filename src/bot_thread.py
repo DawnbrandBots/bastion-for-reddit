@@ -14,17 +14,19 @@ from footer import FOOTER
 
 
 if TYPE_CHECKING:
+    import httpx
     from praw.models import Comment, Submission
 
 
 class BotThread(Thread):
     # https://github.com/DawnbrandBots/bastion-for-reddit/issues/13
     MAX_REPLIES_PER_SUBMISSION = 10
+    _client: "httpx.Client"
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, api_client: "httpx.Client", *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._logger = logging.getLogger(self.name)
-        self._client = get_api_client()
+        self._client = api_client
         self._reddit = get_reddit_client()
         # Actually irrelevant for SubmissionsThread
         self._reply_counter = Counter()

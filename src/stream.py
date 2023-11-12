@@ -9,6 +9,7 @@ from card import parse_summons, get_cards, display_cards
 from bot_thread import BotThread, timestamp_to_iso
 
 if TYPE_CHECKING:
+    import httpx
     from praw.models import Comment, Submission
 
 
@@ -33,8 +34,8 @@ class StreamThread(Generic[Post], BotThread):
 
 
 class SubmissionsThread(StreamThread["Submission"]):
-    def __init__(self) -> None:
-        super().__init__(name="submissions")
+    def __init__(self, api_client: "httpx.Client") -> None:
+        super().__init__(api_client, name="submissions")
 
     # @override
     def _parse_summons(self, submission):
@@ -52,8 +53,8 @@ class SubmissionsThread(StreamThread["Submission"]):
 
 
 class CommentsThread(StreamThread["Comment"]):
-    def __init__(self) -> None:
-        super().__init__(name="comments")
+    def __init__(self, api_client: "httpx.Client") -> None:
+        super().__init__(api_client, name="comments")
 
     # @override
     def _parse_summons(self, comment):

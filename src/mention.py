@@ -11,6 +11,10 @@ from card import parse_summons, get_cards, display_cards
 from footer import FOOTER
 
 
+if TYPE_CHECKING:
+    import httpx
+
+
 INFO = f"""Free and open source _Yu-Gi-Oh!_ bot. Use {{{{card name}}}} in your posts and comments to have me reply with card information.
 Also works outside of Yu-Gi-Oh! subreddits if you mention me in the comment.
 {FOOTER}
@@ -18,8 +22,8 @@ Also works outside of Yu-Gi-Oh! subreddits if you mention me in the comment.
 
 
 class MentionsThread(BotThread):
-    def __init__(self) -> None:
-        super().__init__(name="mentions")
+    def __init__(self, api_client: "httpx.Client") -> None:
+        super().__init__(api_client, name="mentions")
 
     # @override
     def _run(self) -> None:
