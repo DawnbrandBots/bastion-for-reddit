@@ -79,10 +79,8 @@ def format_footer(card: Any) -> str:
         text = f"Password: {card['password']} | Not yet released"
     else:
         text = "Not yet released"
-
-    if card.get('fake_password') is not None:
-        text += f"Placeholder ID: {card['fake_password']}"
-
+        if card.get('fake_password') is not None:
+            text += f" | Placeholder ID: {card['fake_password']}"
     return f"^({text})"
 
 
