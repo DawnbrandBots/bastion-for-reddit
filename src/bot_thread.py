@@ -9,7 +9,7 @@ from typing import Union, TYPE_CHECKING
 from prawcore import Forbidden
 from praw.exceptions import RedditAPIException
 
-from clients import get_api_client, get_reddit_client
+from clients import get_reddit_client
 from footer import FOOTER
 
 
@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 class BotThread(Thread):
     # https://github.com/DawnbrandBots/bastion-for-reddit/issues/13
     MAX_REPLIES_PER_SUBMISSION = 10
-    _client: "httpx.Client"
 
     def __init__(self, api_client: "httpx.Client", *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
+from os import getenv
 import re
 from typing import Any, List, Dict, TYPE_CHECKING
 from urllib.parse import quote_plus
 
 from footer import FOOTER
+from limit_regulation import master_duel_limit_regulation
 
 
 if TYPE_CHECKING:
@@ -29,7 +31,7 @@ def parse_summons(text: str) -> List[str]:
 
 def get_cards(client: "Client", names: List[str]) -> List[Dict[str, Any]]:
     # Could be parallelized, even in a synchronous context
-    responses = [client.get(f"/ocg-tcg/search?name={quote_plus(name)}") for name in names]
+    responses = [client.get(f"{getenv('API_URL')}/ocg-tcg/search?name={quote_plus(name)}") for name in names]
     return [response.json() for response in responses if response.status_code == 200]
 
 
@@ -45,6 +47,16 @@ def format_limit_regulation(value: int | None) -> int | None:
             return 3
         case _:
             return None
+
+
+# Has a global dependency
+def get_master_duel_limit_regulation(card: Any) -> int | None:
+    if not card.get("master_duel_rarity") or not card["konami_id"]:
+        return
+    regulation = master_duel_limit_regulation.get(card["konami_id"])
+    if regulation is not None:
+        return regulation
+    return 3
 
 
 MASTER_DUEL_RARITY = {
@@ -98,7 +110,8 @@ def generate_card_display(card: Any) -> str:
     limit_regulations = [
         {"label": "TCG: ", "value": format_limit_regulation(card["limit_regulation"].get("tcg"))},
         {"label": "OCG: ", "value": format_limit_regulation(card["limit_regulation"].get("ocg"))},
-        {"label": "Speed: ", "value": card["limit_regulation"].get("speed")}
+        {"label": "Speed: ", "value": card["limit_regulation"].get("speed")},
+        {"label": "MD: ", "value": get_master_duel_limit_regulation(card)},
     ]
 
     limit_regulation_display = " / ".join(f"{reg['label']}{reg['value']}" for reg in limit_regulations if reg["value"] is not None)

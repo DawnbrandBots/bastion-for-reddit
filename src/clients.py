@@ -28,4 +28,4 @@ def get_reddit_client() -> praw.Reddit:
 
 
 def get_api_client() -> httpx.Client:
-    return httpx.Client(http2=True, base_url=getenv("API_URL"), headers={"User-Agent": user_agent("httpx")})
+    return httpx.Client(http2=True, headers={"User-Agent": user_agent("httpx")})
