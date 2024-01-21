@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu
+# SPDX-Licence-Identifier: AGPL-3.0-or-later
 from datetime import datetime
 import logging
 from threading import Timer
@@ -26,9 +28,11 @@ class UpdatingLimitRegulationVector:
             try:
                 response = self._client.get(self._url)
                 regulation = response.json()["regulation"]
-                self._vector = { int(konami_id): limit for konami_id, limit in regulation.items() }
+                self._vector = {
+                    int(konami_id): limit for konami_id, limit in regulation.items()
+                }
                 self._logger.info(f"Read {len(self._vector)} entries")
-            except:
+            except Exception:
                 self._logger.error(f"Failed GET [{self._url}]", exc_info=1)
 
     def get(self, konami_id: int) -> int | None:
@@ -42,5 +46,9 @@ class UpdatingLimitRegulationVector:
 
 
 # Globals, to eventually remove
-master_duel_limit_regulation = UpdatingLimitRegulationVector("https://dawnbrandbots.github.io/yaml-yugi-limit-regulation/master-duel/current.vector.json")
-rush_duel_limit_regulation = UpdatingLimitRegulationVector("https://dawnbrandbots.github.io/yaml-yugi-limit-regulation/rush/current.vector.json")
+master_duel_limit_regulation = UpdatingLimitRegulationVector(
+    "https://dawnbrandbots.github.io/yaml-yugi-limit-regulation/master-duel/current.vector.json"
+)
+rush_duel_limit_regulation = UpdatingLimitRegulationVector(
+    "https://dawnbrandbots.github.io/yaml-yugi-limit-regulation/rush/current.vector.json"
+)

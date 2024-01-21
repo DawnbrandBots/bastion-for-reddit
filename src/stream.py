@@ -1,10 +1,15 @@
-# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 from abc import abstractmethod
 from os import getenv
 from typing import Generator, Generic, List, TypeVar, TYPE_CHECKING
 
-from antiabuse import already_replied_to_comment, already_replied_to_submission, is_author_me, is_summon_chain
+from antiabuse import (
+    already_replied_to_comment,
+    already_replied_to_submission,
+    is_author_me,
+    is_summon_chain,
+)
 from card import parse_summons, get_cards, display_cards
 from bot_thread import BotThread, timestamp_to_iso
 
@@ -23,7 +28,9 @@ class StreamThread(Generic[Post], BotThread):
 
     def _main_loop(self, stream: Generator[Post, None, None]):
         for post in stream:
-            self._logger.info(f"{post.id}|{post.permalink}|{timestamp_to_iso(post.created_utc)}")
+            self._logger.info(
+                f"{post.id}|{post.permalink}|{timestamp_to_iso(post.created_utc)}"
+            )
             summons = self._parse_summons(post)
             if len(summons):
                 cards = get_cards(self._client, summons)
@@ -61,8 +68,13 @@ class CommentsThread(StreamThread["Comment"]):
         if is_author_me(comment):
             self._logger.info(f"{comment.id}: skip, self")
             return []
-        if self._reply_counter[comment.submission.id] >= self.MAX_REPLIES_PER_SUBMISSION:
-            self._logger.warning(f"{comment.id}: skip, exceeded limit for {comment.submission.id}")
+        if (
+            self._reply_counter[comment.submission.id]
+            >= self.MAX_REPLIES_PER_SUBMISSION
+        ):
+            self._logger.warning(
+                f"{comment.id}: skip, exceeded limit for {comment.submission.id}"
+            )
             return []
         summons = parse_summons(comment.body)
         self._logger.info(f"{comment.id}| summons: {summons}")

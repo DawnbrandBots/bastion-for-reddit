@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 from os import getenv
 from platform import python_version
@@ -23,7 +23,7 @@ def get_reddit_client() -> praw.Reddit:
         client_secret=getenv("REDDIT_CLIENT_SECRET"),
         username=getenv("REDDIT_USERNAME"),
         password=getenv("REDDIT_PASSWORD"),
-        user_agent=user_agent("praw")
+        user_agent=user_agent("praw"),
     )
 
 

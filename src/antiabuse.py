@@ -1,7 +1,6 @@
-# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 from typing import TYPE_CHECKING
-
 
 if TYPE_CHECKING:
     from praw.models import Comment, Submission
@@ -9,7 +8,10 @@ if TYPE_CHECKING:
 
 
 def is_author_me(comment: "Comment") -> bool:
-    return comment.author is not None and comment.author.name == comment._reddit.user.me().name
+    return (
+        comment.author is not None
+        and comment.author.name == comment._reddit.user.me().name
+    )
 
 
 def is_summon_chain(comment: "Comment") -> bool:

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 from collections import Counter
 from datetime import datetime, timezone
@@ -43,7 +43,9 @@ class BotThread(Thread):
             for item in e.items:
                 if item.error_type == "TOO_LONG":
                     self._logger.warning(f"{target.id}: reply too long", exc_info=e)
-                    reply: "Comment" = target.reply(f"Sorry, the cards are too long to fit into one comment.{FOOTER}")
+                    reply: "Comment" = target.reply(
+                        f"Sorry, the cards are too long to fit into one comment.{FOOTER}"
+                    )
                     self._logger.info(f"{target.id}: posted error {reply.id}")
                     self._reply_counter[target.submission.id] += 1
                     reply.disable_inbox_replies()

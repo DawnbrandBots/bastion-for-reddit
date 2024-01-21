@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 import logging
 
@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from clients import get_api_client
 from limit_regulation import master_duel_limit_regulation
 from mention import MentionsThread
-from stream import SubmissionsThread, CommentsThread
+from stream import CommentsThread, SubmissionsThread
 
 
 def main():

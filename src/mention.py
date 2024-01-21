@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2023 Kevin Lu, Luna Brand
+# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 from os import getenv
 from typing import TYPE_CHECKING
@@ -9,7 +9,6 @@ from antiabuse import is_summon_chain
 from bot_thread import BotThread, timestamp_to_iso
 from card import parse_summons, get_cards, display_cards
 from footer import FOOTER
-
 
 if TYPE_CHECKING:
     import httpx
@@ -33,10 +32,17 @@ class MentionsThread(BotThread):
             if not comment.new:
                 self._logger.info(f"{comment.id}|{comment.context}| skip, read")
                 continue
-            self._logger.info(f"{comment.id}|{comment.context}|{timestamp_to_iso(comment.created_utc)}")
+            self._logger.info(
+                f"{comment.id}|{comment.context}|{timestamp_to_iso(comment.created_utc)}"
+            )
             comment.mark_read()
-            if self._reply_counter[comment.submission.id] >= self.MAX_REPLIES_PER_SUBMISSION:
-                self._logger.warning(f"{comment.id}: skip, exceeded limit for {comment.submission.id}")
+            if (
+                self._reply_counter[comment.submission.id]
+                >= self.MAX_REPLIES_PER_SUBMISSION
+            ):
+                self._logger.warning(
+                    f"{comment.id}: skip, exceeded limit for {comment.submission.id}"
+                )
                 continue
             if is_summon_chain(comment):
                 self._logger.info(f"{comment.id}: skip, parent comment is me")
