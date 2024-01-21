@@ -102,7 +102,7 @@ def generate_card_display(card: Any) -> str:
     if card.get("images"):
         image_link = f"https://yugipedia.com/wiki/Special:Redirect/file/{card['images'][0]['image']}?utm_source=bastion&utm_medium=reddit"
         links += f"[Card Image]({image_link}) | "
-    if card["konami_id"] != None:
+    if card["konami_id"] is not None:
         # Official database, does not work for zh locales
         official = f"https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&request_locale=en&cid={card['konami_id']}"
         rulings = f"https://www.db.yugioh-card.com/yugiohdb/faq_search.action?ope=4&request_locale=ja&cid={card['konami_id']}"
