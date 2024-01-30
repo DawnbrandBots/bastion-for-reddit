@@ -24,9 +24,7 @@ hpack==4.0.0
 httpcore==1.0.2
     # via httpx
 httpx[http2]==0.26.0
-    # via
-    #   -r requirements.in
-    #   httpx
+    # via -r requirements.in
 hyperframe==6.0.1
     # via h2
 idna==3.4
@@ -38,7 +36,7 @@ praw==7.7.1
     # via -r requirements.in
 prawcore==2.4.0
     # via praw
-python-dotenv==1.0.0
+python-dotenv==1.0.1
     # via -r requirements.in
 requests==2.31.0
     # via
