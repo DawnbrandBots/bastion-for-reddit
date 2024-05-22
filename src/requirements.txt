@@ -38,7 +38,7 @@ prawcore==2.4.0
     # via praw
 python-dotenv==1.0.1
     # via -r requirements.in
-requests==2.31.0
+requests==2.32.0
     # via
     #   prawcore
     #   update-checker
