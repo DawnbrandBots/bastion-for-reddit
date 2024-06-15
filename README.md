@@ -63,7 +63,7 @@ python3 src/bastion.py
 
 ## Licence
 
-Copyright © 2023 Kevin Lu, Luna Brand.
+Copyright © 2023–2024 Kevin Lu, Luna Brand.
 See [COPYING](https://github.com/DawnbrandBots/bastion-for-reddit/blob/master/COPYING) for more details.
 
 ```
