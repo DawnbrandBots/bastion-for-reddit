@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM python:3.12-alpine
 ARG REVISION
 LABEL org.opencontainers.image.title="Bastion Reddit bot"
 LABEL org.opencontainers.image.authors="bastionbotdev@gmail.com"
