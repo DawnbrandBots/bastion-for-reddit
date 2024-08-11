@@ -5,7 +5,7 @@ import logging
 from dotenv import load_dotenv
 
 from clients import get_api_client
-from limit_regulation import master_duel_limit_regulation
+from limit_regulation import master_duel_limit_regulation, rush_duel_limit_regulation
 from mention import MentionsThread
 from stream import CommentsThread, SubmissionsThread
 
@@ -15,11 +15,14 @@ def main():
     load_dotenv()
     api_client = get_api_client()
     master_duel_limit_regulation.set_client(api_client)
+    rush_duel_limit_regulation.set_client(api_client)
     submissions_thread = SubmissionsThread(api_client)
     comments_thread = CommentsThread(api_client)
     mentions_thread = MentionsThread(api_client)
     master_duel_limit_regulation.update(True)
     master_duel_limit_regulation.start()
+    rush_duel_limit_regulation.update(True)
+    rush_duel_limit_regulation.start()
     submissions_thread.start()
     comments_thread.start()
     mentions_thread.start()
