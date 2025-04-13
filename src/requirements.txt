@@ -46,7 +46,7 @@ typing-extensions==4.13.1
     # via anyio
 update-checker==0.18.0
     # via praw
-urllib3==2.3.0
+urllib3==2.4.0
     # via requests
 websocket-client==1.8.0
     # via praw
