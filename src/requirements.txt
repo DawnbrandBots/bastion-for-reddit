@@ -11,7 +11,7 @@ certifi==2025.4.26
     #   httpcore
     #   httpx
     #   requests
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 h11==0.16.0
     # via httpcore
