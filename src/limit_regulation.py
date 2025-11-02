@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu
+# SPDX-FileCopyrightText: © 2023–2025 Kevin Lu
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 from datetime import datetime
 import logging
@@ -51,4 +51,7 @@ master_duel_limit_regulation = UpdatingLimitRegulationVector(
 )
 rush_duel_limit_regulation = UpdatingLimitRegulationVector(
     "https://dawnbrandbots.github.io/yaml-yugi-limit-regulation/rush/current.vector.json"
+)
+genesys_limit_regulation = UpdatingLimitRegulationVector(
+    "https://dawnbrandbots.github.io/yaml-yugi-limit-regulation/genesys/current.vector.json"
 )

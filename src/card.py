@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2023–2024 Kevin Lu, Luna Brand
+# SPDX-FileCopyrightText: © 2023–2025 Kevin Lu, Luna Brand
 # SPDX-Licence-Identifier: AGPL-3.0-or-later
 from os import getenv
 import re
@@ -6,7 +6,7 @@ from typing import Any, List, Dict, TYPE_CHECKING
 from urllib.parse import quote_plus
 
 from footer import FOOTER
-from limit_regulation import master_duel_limit_regulation
+from limit_regulation import master_duel_limit_regulation, genesys_limit_regulation
 
 
 if TYPE_CHECKING:
@@ -90,6 +90,17 @@ def format_footer(card: Any) -> str:
     return f"^({text})"
 
 
+def is_pendulum_or_link(card: Any) -> bool:
+    return card["card_type"] == "Monster" and (
+        "pendulum_scale" in card or "link_arrows" in card
+    )
+
+
+# Has a global dependency
+def get_genesys_limit_regulation(card: Any) -> int:
+    return genesys_limit_regulation.get(card["konami_id"]) or 0
+
+
 def generate_card_display(card: Any) -> str:
     yugipedia_page = card["konami_id"] or quote_plus(card["name"]["en"])
     yugipedia = f"https://yugipedia.com/wiki/{yugipedia_page}?utm_source=bastion&utm_medium=reddit"
@@ -132,6 +143,14 @@ def generate_card_display(card: Any) -> str:
 
     if len(limit_regulation_display) > 0:
         description += f"^(**Limit**: {limit_regulation_display})  \n"
+
+    # Display Genesys points if this is a non-Link, non-Pendulum TCG card
+    if (
+        card["konami_id"] is not None
+        and limit_regulations[0]["value"] is not None
+        and not is_pendulum_or_link(card)
+    ):
+        description += f"[^(**Genesys**)](https://www.yugioh-card.com/en/genesys/) ^**points**: ^{get_genesys_limit_regulation(card)}  \n"
 
     if card.get("master_duel_rarity"):
         md_rarity_code = card["master_duel_rarity"]
