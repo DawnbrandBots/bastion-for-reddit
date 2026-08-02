@@ -4,6 +4,9 @@ A free and open-source Reddit bot for looking up cards and other useful informat
 _Yu-Gi-Oh! Trading Card Game_ and _Official Card Game_. This is a port of the
 [Discord bot](https://github.com/DawnbrandBots/bastion-bot).
 
+> [!WARNING]
+> Reddit banned the bot account [/u/BastionBotYuGiOh](https://reddit.com/u/BastionBotYuGiOh) on June 28 without explanation, nor was an appeal accepted. While this program should remain functional, operations are suspended as a result. [GitHub Discussion](https://github.com/DawnbrandBots/bastion-bot/discussions/721)
+
 [Announcement post on /r/yugioh](https://reddit.com/r/yugioh/comments/139u4wb/the_bastion_card_bot_is_now_available_on_this/).
 
 [![Build Docker image](https://github.com/DawnbrandBots/bastion-for-reddit/actions/workflows/docker.yml/badge.svg)](https://github.com/DawnbrandBots/bastion-for-reddit/actions/workflows/docker.yml)
